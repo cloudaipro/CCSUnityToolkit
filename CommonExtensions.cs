@@ -29,6 +29,17 @@ public static class CommonExtensions
         return rowArray;
     }
 
+    public static R Let<T, R>(this T self, Func<T, R> block)
+    {
+        return block(self);
+    }
+
+    public static T Also<T>(this T self, Action<T> block)
+    {
+        block(self);
+        return self;
+    }
+
     public static string LeadingZero(this int n, int totalWidth) => n.ToString().PadLeft(totalWidth, '0');
 
     public static string GetDescription(this Enum value)
