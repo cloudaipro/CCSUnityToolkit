@@ -2,11 +2,26 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
 public static class CommonExtensions
 {
+    #region also/let
+    public static R Let<T, R>(this T self, Func<T, R> block)
+    {
+        return block(self);
+    }
+
+    public static T Also<T>(this T self, Action<T> block)
+    {
+        block(self);
+        return self;
+    }
+    #endregion
+
+    #region row/column method of list
     public static T[] column<T>(this T[,] multidimArray, int wanted_column)
     {
         int l = multidimArray.GetLength(0);
@@ -28,17 +43,61 @@ public static class CommonExtensions
         }
         return rowArray;
     }
+    #endregion
 
-    public static R Let<T, R>(this T self, Func<T, R> block)
+    #region enumerable extensions
+    public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> method)
     {
-        return block(self);
+        foreach (T item in enumerable)
+        {
+            method(item);
+        }
     }
 
-    public static T Also<T>(this T self, Action<T> block)
+    public static void ForEachWithIndex<T>(this IEnumerable<T> enumerable, Action<T, int> handler)
     {
-        block(self);
-        return self;
+        int idx = 0;
+        foreach (T item in enumerable)
+            handler(item, idx++);
     }
+
+    public static void foreachReverse<T>(this IEnumerable<T> enumerable, Action<T, int> handler)
+    {
+        for (int idx = enumerable.Count() - 1; idx >= 0; idx--)
+            handler(enumerable.ElementAt(idx), idx);
+    }
+
+    public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> action, Func<bool> breakOn)
+    {
+        foreach (var item in enumerable)
+        {
+            action(item);
+            if (breakOn())
+                break;
+        }
+    }
+
+    public static void ForEachWithIndex<T>(this IEnumerable<T> enumerable, Action<T, int> action, Func<bool> breakOn)
+    {
+        int idx = 0;
+        foreach (T item in enumerable)
+        {
+            action(item, idx++);
+            if (breakOn())
+                break;
+        }
+    }
+
+    public static void foreachReverse<T>(this IEnumerable<T> enumerable, Action<T, int> action, Func<bool> breakOn)
+    {
+        for (int idx = enumerable.Count() - 1; idx >= 0; idx--)
+        {
+            action(enumerable.ElementAt(idx), idx);
+            if (breakOn())
+                break;
+        }
+    }
+    #endregion
 
     public static string LeadingZero(this int n, int totalWidth) => n.ToString().PadLeft(totalWidth, '0');
 
