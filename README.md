@@ -10,3 +10,6 @@ mono ./Generator.exe 100 Hard Hard.txt
  { "Medium", Tuple.Create(81, 5) },<br />
  { "Hard", Tuple.Create(81, 15) },<br />
  { "Extreme", Tuple.Create(81, 45) }<br />
+
+# cutoff mode
+  mono ./Generator.exe 100 72 evit.txt
