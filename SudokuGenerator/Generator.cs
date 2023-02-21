@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 public class Generator
 {
@@ -178,5 +177,44 @@ public class Generator
 
         return (final.cells.Select(x => x.Value).ToArray(), initial.cells.Select(x => x.Value).ToArray());
     }
+
+    private struct SudokuBoardData
+    {
+        public int[] unsolved_data;
+        public int[] solved_data;
+        public SudokuBoardData(int[] unsolved, int[] solved) : this()
+        {
+            this.unsolved_data = unsolved;
+            this.solved_data = solved;
+        }
+    };
+    static void Main(string[] args) {
+        //args.ForEachWithIndex((x, idx) => Console.WriteLine(idx.ToString() + ":" + x));
+        
+        var count = Int32.Parse(args[0]);
+        var level = args[1];
+        string file = args[2];
+
+        StreamWriter writer = new StreamWriter(file, true);
+        writer.WriteLine("[");
+        while (count-- > 0)
+        {
+            Generator.Sudoku_Generator(level).Also(x =>
+            {
+                var board = new SudokuBoardData(x.unsolved, x.solved);
+                var json = "{\"unsolved_data\":[";
+                json += board.unsolved_data.Select(y => y.ToString()).Aggregate((a, b) => $"{a},{b}");
+                json += "],";
+                json += "\"solved_data\":[";
+                json += board.solved_data.Select(y => y.ToString()).Aggregate((a, b) => $"{a},{b}");
+                json += ("]}" + ((count == 0) ? "" : ","));
+                writer.WriteLine(json);
+                Console.WriteLine(json);
+            });            
+        }
+        writer.Write("]");
+        writer.Close();        
+    }
+
 
 }
