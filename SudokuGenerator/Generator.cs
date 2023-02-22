@@ -62,6 +62,8 @@ public class Generator
         }
     }
 
+    // method gets all possible values for a particular cell, if there is only one
+    // then we can remove that cell
     public void ReduceViaLogical(int cutoff = 81)
     {
         var usedCells = board.get_used_cells();
@@ -82,10 +84,13 @@ public class Generator
         }
     }
 
+    // method attempts to remove a cell and checks that solution is still unique
     public void ReduceViaRandom(int cutoff = 81)
     {
         var temp = board;
         var existing = temp.get_used_cells();
+
+        // sorting used cells by density heuristic, highest to lowest
         var newSet = existing.Select(x => new { Cell = x, Density = temp.get_density(x) }).ToList();
         var elements = newSet.OrderByDescending(x => x.Density).Select(x => x.Cell).ToList();
 
@@ -99,6 +104,8 @@ public class Generator
             {
                 cell.Value = x;
                 var s = new Solver(temp);
+                // if solver can fill every box and the solution is valid then
+                // puzzle becomes ambiguous after removing particular cell, so we can break out
                 if (s.solve() && s.is_valid())
                 {
                     cell.Value = original;
@@ -107,12 +114,13 @@ public class Generator
                 }
             }
 
+            // if every value was checked and puzzle remains unique, we can remove it
             if (!ambiguous)
             {
                 cell.Value = 0;
                 cutoff -= 1;
             }
-
+            // if we ever meet the cutoff limit we can break out
             if (cutoff == 0)
             {
                 break;
@@ -133,11 +141,14 @@ public class Generator
             new Dictionary<string, Tuple<int, int>>() {
                 { "Easy", Tuple.Create(35, 0) },
                 { "Medium", Tuple.Create(81, 5) },
-                { "Hard", Tuple.Create(81, 10) },
-                { "Extreme", Tuple.Create(81, 15) }
+                { "Hard", Tuple.Create(81, 15) },
+                { "Extreme", Tuple.Create(81, 45) }
             };
         Tuple<int, int> difficulty = difficulties[difficultyStr];
-
+        return Sudoku_Generator(difficulty);
+    }
+    public static (int[] unsolved, int[] solved) Sudoku_Generator(Tuple<int, int> difficulty)
+    {
         // constructing generator object from puzzle file (space delimited columns, line delimited rows)
         Generator gen = new Generator(@"
             1 2 3 4 5 6 7 8 9
@@ -177,7 +188,7 @@ public class Generator
 
         return (final.cells.Select(x => x.Value).ToArray(), initial.cells.Select(x => x.Value).ToArray());
     }
-
+    
     private struct SudokuBoardData
     {
         public int[] unsolved_data;
@@ -188,33 +199,34 @@ public class Generator
             this.solved_data = solved;
         }
     };
-    static void Main(string[] args) {
-        //args.ForEachWithIndex((x, idx) => Console.WriteLine(idx.ToString() + ":" + x));
-        
+    static void Main(string[] args) {        
         var count = Int32.Parse(args[0]);
         var level = args[1];
         string file = args[2];
+
+        int cutoff = 0;
+        bool cutoffMode = false;
+        if (Int32.TryParse(level, out cutoff))
+            cutoffMode = true;
 
         StreamWriter writer = new StreamWriter(file, true);
         writer.WriteLine("[");
         while (count-- > 0)
         {
-            Generator.Sudoku_Generator(level).Also(x =>
-            {
-                var board = new SudokuBoardData(x.unsolved, x.solved);
-                var json = "{\"unsolved_data\":[";
-                json += board.unsolved_data.Select(y => y.ToString()).Aggregate((a, b) => $"{a},{b}");
-                json += "],";
-                json += "\"solved_data\":[";
-                json += board.solved_data.Select(y => y.ToString()).Aggregate((a, b) => $"{a},{b}");
-                json += ("]}" + ((count == 0) ? "" : ","));
-                writer.WriteLine(json);
-                Console.WriteLine(json);
-            });            
+            var sudoku = (cutoffMode) ? Generator.Sudoku_Generator(Tuple.Create(81, cutoff)) : Generator.Sudoku_Generator(level);
+            var board = new SudokuBoardData(sudoku.unsolved, sudoku.solved);
+            var json = "{\"unsolved_data\":[";
+            json += board.unsolved_data.Select(y => y.ToString()).Aggregate((a, b) => $"{a},{b}");
+            json += "],";
+            json += "\"solved_data\":[";
+            json += board.solved_data.Select(y => y.ToString()).Aggregate((a, b) => $"{a},{b}");
+            json += ("]}" + ((count == 0) ? "" : ","));
+            writer.WriteLine(json);
+            Console.WriteLine(json);
         }
         writer.Write("]");
         writer.Close();        
     }
-
+    
 
 }
