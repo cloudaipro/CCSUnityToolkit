@@ -222,7 +222,7 @@ public class Generator
             json += board.solved_data.Select(y => y.ToString()).Aggregate((a, b) => $"{a},{b}");
             json += ("]}" + ((count == 0) ? "" : ","));
             writer.WriteLine(json);
-            Console.WriteLine(json);
+            Console.WriteLine(count.ToString() + "=> " + json);
         }
         writer.Write("]");
         writer.Close();        
