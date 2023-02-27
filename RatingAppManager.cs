@@ -8,7 +8,7 @@ using Google.Play.Review;
 
 public class RatingAppManager : MonoBehaviour
 {
-    public static RatingAppManager Instance = new RatingAppManager();
+    public static RatingAppManager Instance;
 
     [Tooltip("Display app rating window after x game opened.")]
     public int remindRating = 5; // open rating window at X game start
@@ -20,12 +20,19 @@ public class RatingAppManager : MonoBehaviour
     private Coroutine _coroutine;
 #endif
 
-    void Start()
+    private void Awake()
     {
         // increase game open counter
         int gameOpenCounter = PlayerPrefs.GetInt("gameOpenCounter", 0) + 1;
         PlayerPrefs.SetInt("gameOpenCounter", gameOpenCounter);
+        DontDestroyOnLoad(this);
 
+        Instance = this;
+    }
+    
+
+    void Start()
+    {       
 #if UNITY_ANDROID       
         _coroutine = StartCoroutine(InitReview());
 #endif
