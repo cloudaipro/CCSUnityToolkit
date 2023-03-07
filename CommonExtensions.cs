@@ -97,9 +97,10 @@ public static class CommonExtensions
                 break;
         }
     }
-
-    public static void Shuffle<T>(this IList<T> list)
+    public static IList<T> Shuffle<T>(this IEnumerable<T> list) => list.ToList().Shuffle();
+    public static IList<T> Shuffle<T>(this IList<T> list)
     {
+        if (list.Count <= 1) return list;
         RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
         int n = list.Count;
         while (n > 1)
@@ -113,6 +114,7 @@ public static class CommonExtensions
             list[k] = list[n];
             list[n] = value;
         }
+        return list;
     }
     #endregion
 

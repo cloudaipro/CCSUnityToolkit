@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TransitionEffection
 {
-    public delegate void DidBlockGradient(object gameObject);
+    //public delegate void DidBlockGradient(object gameObject);
     public static IEnumerator BlockGradientTransition<T>(IList<T[]> finishedList, List<Color> gradient_colors, float transitionTime
                                                          //, DidBlockGradient didTransitioned = null
                                                         ) where T : Selectable

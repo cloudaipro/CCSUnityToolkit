@@ -46,6 +46,7 @@ public class RatingAppManager : MonoBehaviour
 
     public void AskForRating()
     {
+        Debug.Log("+++++++++  AskForRating  ++++++++++++");
 #if UNITY_IOS
         UnityEngine.iOS.Device.RequestStoreReview();
 #else
