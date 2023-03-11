@@ -13,8 +13,7 @@ mono ./Generator.exe 100 Hard Hard.txt
 
 # cutoff mode
 # ex  mono ./Generator.exe 100 72 evit.txt
-mono ./Generator.exe 1000 15 intermediator.txt <br />
-mono ./Generator.exe 1000 45 medium.txt <br />
-mono ./Generator.exe 1000 72 hard.txt <br />
+mono ./Generator.exe 1000 10 medium.txt <br />
+mono ./Generator.exe 1000 15 hard.txt <br />
 mono ./Generator.exe 500 72 extreme.txt <br />
 
