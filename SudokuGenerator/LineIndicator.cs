@@ -9,7 +9,7 @@ public class LineIndicator
     public static LineIndicator Instance = new LineIndicator();
     public int[,] Line_data = new int[9, 9];
     public int[] Line_data_falt = new int[81];
-    public int[,] Square_data = new int[9, 9];
+    public int[,] Block_data = new int[9, 9];
     public LineIndicator()
     {
         int start_num = 0, iSquareRow = 0, iSquareRowSub = 0, iSquareCol = 0, iSquareColSub = 0;
@@ -23,29 +23,71 @@ public class LineIndicator
                 iSquareRowSub = r % 3;
                 iSquareCol = c / 3;
                 iSquareColSub = c % 3;
-                Square_data[iSquareRow * 3 + iSquareCol, iSquareRowSub * 3 + iSquareColSub] = start_num;
+                Block_data[iSquareRow * 3 + iSquareCol, iSquareRowSub * 3 + iSquareColSub] = start_num;
 
                 start_num++;
             }                  
     }
 
-    private (int, int) GetSquarePosition(int square_index)
+    public (int r, int c, int b) GetCellPosition(int square_index)
     {
-        return ((int)(square_index / 9), square_index % 9);        
+        int row = (int)(square_index / 9);
+        int col = square_index % 9;
+        return (row, col, ((row / 3) * 3 + col / 3));        
     }
 
-    public int[] GetHorizontalLine(int square_index) => Line_data.row(GetSquarePosition(square_index).Item1);
-    public int[] GetVerticalLine(int square_index) => Line_data.column(GetSquarePosition(square_index).Item2);
-    public int[] GetSquare(int square_index)
+    public int[] GetHouse(int h) => (h < 9) ? Line_data.row(h) :
+                                    (h < 18) ? Line_data.column(h - 9) :
+                                               Block_data.row(h - 18);
+
+    public int[] GetHorizontalLine(int cell_index) => Line_data.row(GetCellPosition(cell_index).Item1);
+    public int[] GetVerticalLine(int cell_index) => Line_data.column(GetCellPosition(cell_index).Item2);
+    public int[] GetBlockFlat(int cell_index)
     {
-        var squarePos = GetSquarePosition(square_index);
-        return Square_data.row(((squarePos.Item1 / 3) * 3 + squarePos.Item2 / 3));
+        var cellPos = GetCellPosition(cell_index);
+        return Block_data.row(cellPos.b);
     }
-    public int[] GetAllRelatedSudokuCell(int square_index) =>
-        GetSquare(square_index)
-            .Union(GetHorizontalLine(square_index))
-            .Union(GetVerticalLine(square_index)).Distinct().ToArray();
+    public int[] GetAllRelatedSudokuCell(int cell_index) =>
+        GetBlockFlat(cell_index)
+            .Union(GetHorizontalLine(cell_index))
+            .Union(GetVerticalLine(cell_index)).Distinct().ToArray();
 
     public int[] GetAllSquaresIndexes() => Line_data_falt;
-    
+    public (int hLineIdx1, int hLineIdx2, int vLineIdx1, int vLineIdx2) GetExcludeLineIndices(int cell_index)
+    {
+        int hLineIdx1, hLineIdx2, vLineIdx1, vLineIdx2;        
+        var r = ((int)(cell_index / 9)) % 3;
+        if (r == 0)
+        {
+            hLineIdx1 = cell_index + 9;
+            hLineIdx2 = cell_index + 18;
+        }
+        else if (r == 1)
+        {
+            hLineIdx1 = cell_index - 9;
+            hLineIdx2 = cell_index + 9;
+        }
+        else
+        {
+            hLineIdx1 = cell_index - 18;
+            hLineIdx2 = cell_index - 9;
+        }
+        var c = cell_index % 3;
+        if (c == 0)
+        {
+            vLineIdx1 = cell_index + 1;
+            vLineIdx2 = cell_index + 2;
+        }
+        else if (c == 1)
+        {
+            vLineIdx1 = cell_index - 1;
+            vLineIdx2 = cell_index + 1;
+        }
+        else
+        {
+            vLineIdx1 = cell_index - 2;
+            vLineIdx2 = cell_index - 1;
+        }
+        return (hLineIdx1, hLineIdx2, vLineIdx1, vLineIdx2);
+    }
 }

@@ -18,7 +18,6 @@ public class Generator
     //}
     public Generator(string sudoku_sample)
     {
-        var numbers = new string(sudoku_sample.Where(x => "123456789".Contains(x)).ToArray());
         var numbersList = sudoku_sample.Select(x => Convert.ToInt32(x.ToString())).ToList();        
 
         board = new Board(numbersList);
@@ -371,7 +370,7 @@ public static (int[] unsolved, int[] solved) Sudoku_Generator(Tuple<int, int> di
             json += "],";
             json += "\"solved_data\":[";
             json += board.solved_data.Select(y => y.ToString()).Aggregate((a, b) => $"{a},{b}");
-            json += ("]}" + ((count == 0) ? "" : ","));
+            json += ("],\"difficulity\":"+ cutoff + "}" + ((count == 0) ? "" : ","));
             writer.WriteLine(json);
             Console.WriteLine(count.ToString() + "=> " + json);
         }
